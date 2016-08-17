@@ -31,7 +31,7 @@ ip route add from 10.1.2.1/32 lookup 6 priority 100
 
 so example ping would be:
 ```
-/usr/bin/python /home/rancid/ping/ping.py -c 20 -t 1 -n int_eth1 -s 10.1.2.1 -d 10.1.3.1
+/usr/bin/python ~/ping/ping.py -c 20 -t 1 -n int_eth1 -s 10.1.2.1 -d 10.1.3.1
 ```
 
 The ping will go out interface eth1 with the policy-based route in place.
