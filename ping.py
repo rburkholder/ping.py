@@ -39,6 +39,7 @@
     - Commented out rrd code as I don't have the right libraries installed for that
     - Added src_addr: ping uses a specific interface (allows use of linux policy based routing)
     - Added src_name: used in output documentation
+    - Added dest_name: used in output documentation
 
     November 8, 2009
     ----------------
@@ -234,8 +235,9 @@ if __name__ == '__main__':
     count = 10              # Default send 10 packets
     timeout = 2             # Default timeout = 3 seconds
     src_addr = ''           # default to nearest port
-    src_name = 'default'    # default to a default name
+    src_name = 'src'        # default to a default name
     dest_addr = '8.8.8.8'   # Default ping 8.8.8.8
+    dest_name = 'dst'       # default to a default name
     output = 'normal'       # Default human readable output
     rrd_file = None         # RRD file
 
@@ -246,9 +248,9 @@ if __name__ == '__main__':
     time_sent = []  # Timestamp when packet is sent
     time_recv = []  # Timestamp when packet is received
 
-    help_line = 'Usage: %s -c [count] -t [timeout] -n [sourcename] -s [sourceip] -d [host] -o [normal|nagios|rrd] -f [rrd file]'
+    help_line = 'Usage: %s -c [count] -t [timeout] -a [srcname] -b [dstname] -s [srcip] -d [dsthost] -o [normal|nagios|rrd] -f [rrd file]'
     try:
-        opts, args = getopt.getopt(sys.argv[1:], ':hc:t:n:s:d:o:f:')
+        opts, args = getopt.getopt(sys.argv[1:], ':hc:t:a:b:s:d:o:f:')
     except getopt.GetoptError as err:
         print help_line % sys.argv[0]
         sys.exit(1)
@@ -260,12 +262,18 @@ if __name__ == '__main__':
             count = int(arg)
         elif opt in '-t':
             timeout = int(arg)
-        elif opt in '-n':
-            src_name = arg
         elif opt in '-s':
             src_addr = arg
+            if 'src' == src_name:
+                src_name = src_addr
+        elif opt in '-a':
+            src_name = arg
         elif opt in '-d':
             dest_addr = arg
+            if 'dst' == dest_name:
+                dest_name = dest_addr
+        elif opt in '-b':
+            dest_name = arg
         elif opt in '-o':
             output = arg
         elif opt in '-f':
@@ -338,7 +346,7 @@ if __name__ == '__main__':
 
     # Printing values
     if output == 'normal':
-        print("Statistics for %s to %s:" %(src_name, dest_addr))
+        print("Statistics for %s to %s:" %(src_name, dest_name))
         print(" - packet loss: %i (%.2f%%)" %(lost, lost_perc))
         if type(min_latency) != str and type(max_latency) != str and type(avg_latency) != str:
             print(" - latency (MIN/MAX/AVG): %i/%i/%i" %(min_latency, max_latency, avg_latency))
@@ -352,14 +360,14 @@ if __name__ == '__main__':
     elif output == 'nagios':
         if lost_perc == 100:
 #            print('2 %s_stats lost=%.2f|delay=%i;75;100;0;%i|mos=%.1f;4.0;3.0;0.0;5.0 ' %(dest_addr, lost_perc, timeout * 1000, timeout * 1000, mos))
-            print('2 %s_to_%s_loss lost=%.2f %s - no reply' %(src_name, dest_addr, lost_perc, dest_addr))
+            print('2 %s_to_%s_loss lost=%.2f %s - no reply' %(src_name, dest_name, lost_perc, dest_addr))
             sys.exit(2)
         else:
 #            print('0 %s_stats lost=%.2f|delay=%i;75;100;0;%i|jitter=%.2f|mos=%.1f;4.0;3.0;0.0;5.0 test' %(dest_addr, lost / float(count) * 100, sum(latency) / len(latency), timeout * 1000, jitter[len(jitter) - 1 ], mos))
-            print('0 %s_to_%s_loss loss=%.2f %s - %.f packets lost' %(src_name, dest_addr, lost / float(count) * 100, dest_addr, lost / float(count) * 100 ))
-            print('0 %s_to_%s_delay delay=%i;75;100;0;%i %s - %i ms delay' %(src_name, dest_addr,  sum(latency) / len(latency), timeout * 1000, dest_addr, sum(latency) / len(latency) ))
-            print('0 %s_to_%s_jitter jitter=%.2f %s - %.2f ms jitter' %(src_name, dest_addr,  jitter[len(jitter) - 1 ], dest_addr,  jitter[len(jitter) - 1 ] ))
-            print('0 %s_to_%s_mos mos=%.1f;4.0;3.0;0.0;5.0 %s - mos score %.1f' %(src_name, dest_addr, mos, dest_addr, mos))
+            print('0 %s_to_%s_loss loss=%.2f %s - %.f packets lost' %(src_name, dest_name, lost / float(count) * 100, dest_addr, lost / float(count) * 100 ))
+            print('0 %s_to_%s_delay delay=%i;75;100;0;%i %s - %i ms delay' %(src_name, dest_name,  sum(latency) / len(latency), timeout * 1000, dest_addr, sum(latency) / len(latency) ))
+            print('0 %s_to_%s_jitter jitter=%.2f %s - %.2f ms jitter' %(src_name, dest_name,  jitter[len(jitter) - 1 ], dest_addr,  jitter[len(jitter) - 1 ] ))
+            print('0 %s_to_%s_mos mos=%.1f;4.0;3.0;0.0;5.0 %s - mos score %.1f' %(src_name, dest_name, mos, dest_addr, mos))
             sys.exit(0)
 #        if lost_perc == 100:
 #            print('UNREACHABLE | lost=%.2f delay=%i;75;100;0;%i mos=%.1f;4.0;3.0;0.0;5.0' %(lost_perc, timeout * 1000, timeout * 1000, mos))
