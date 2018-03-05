@@ -13,10 +13,10 @@ This next iteration allows:
 
 linux policy based routing example:
 * local interface eth0: 10.1.1.1/30
-*            other end: 10.1.1.2/30 (this is default gateway)
+* other end: 10.1.1.2/30 (this is default gateway)
 * local interface eth1: 10.1.2.1/30
-*            other end: 10.1.2.2/30
-*     destination host: 10.1.3.1
+* other end: 10.1.2.2/30
+* destination host: 10.1.3.1
 
 ```
 ip route add 0/0 via 10.1.1.2
@@ -38,3 +38,5 @@ The ping will go out interface eth1 with the policy-based route in place.
 Without the policy based route in place, the ping will go out eth0.
 
 [blog.raymond.burkholder.net: ping with loss delay jitter and MOS](http://blog.raymond.burkholder.net/index.php?/archives/680-ping.py-Network-ping-with-delay-jitter-and-MOS.html)
+
+Files in the lib directory are for historical value only, and are not necessary for operation of ping.py.
